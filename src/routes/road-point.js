@@ -47,6 +47,20 @@ router.post('/create', function (req, res, next) {
     });
   }).catch(next);
 });
+/* 删除道路下的点 */
+router.post('/remove', function (req, res, next) {
+  let { body: { id } } = req;
+  return sequelize.transaction(() => {
+    return sequelize.query('DELETE FROM points WHERE id = ' + id, {
+      model: RoadPoint,
+      type: sequelize.QueryTypes.DELETE
+    });
+  }).then(() => {
+    return res.send(new APIResult(ResponseType.SUCCESS));
+  }, error => {
+    return res.send(new APIResult(ResponseType.POINT_UPDATE, null, error));
+  }).catch(next);
+});
 /* 道路下更新点 */
 router.post('/edit', function (req, res, next) {
   let { body: { id, direction,
@@ -62,14 +76,14 @@ router.post('/edit', function (req, res, next) {
     crossType,
     crossInfo
   }, {
-    where: {
-      id
-    }
-  }).then(() => {
-    return res.send(new APIResult(ResponseType.SUCCESS));
-  }, error => {
-    return res.send(new APIResult(ResponseType.POINT_UPDATE, null, error));
-  }).catch(next);
+      where: {
+        id
+      }
+    }).then(() => {
+      return res.send(new APIResult(ResponseType.SUCCESS));
+    }, error => {
+      return res.send(new APIResult(ResponseType.POINT_UPDATE, null, error));
+    }).catch(next);
 });
 /* 查询单个点信息 */
 router.get('/:id', function (req, res, next) {

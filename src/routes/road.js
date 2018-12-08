@@ -1,4 +1,4 @@
-let { Road, sequelize } = require('../db');
+let { Road, RoadPoint, sequelize } = require('../db');
 let express = require('express');
 let router = express.Router();
 let { RoadType, MarkStatus, ResponseType } = require('../enum');
@@ -43,6 +43,19 @@ router.post('/edit', function (req, res, next) {
   }).then(() => {
     return res.send(new APIResult(ResponseType.SUCCESS));
   }, error => {
+    return res.send(new APIResult(ResponseType.ROAD_UPDATE, null, error));
+  }).catch(next);
+});
+router.post('/findAll', function (req, res, next) {
+  let { body: { userId } } = req;
+  let sql = 'select * from roads t1 left join points t2 on t1.id = t2.roadId where t1.userId = "' + userId + '"';
+  return sequelize.query(sql, {
+    model: RoadPoint,
+    type: sequelize.QueryTypes.QUERY
+  }).then((roads) => {
+    return res.send(new APIResult(ResponseType.SUCCESS, roads));
+  }, error => {
+    console.log(error);
     return res.send(new APIResult(ResponseType.ROAD_UPDATE, null, error));
   }).catch(next);
 });
