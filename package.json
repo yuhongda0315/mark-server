@@ -1,0 +1,40 @@
+{
+  "name": "mark-server",
+  "version": "1.0.0",
+  "description": "map mark",
+  "main": "./src/index.js",
+  "scripts": {
+    "eslint": "eslint .",
+    "precommit": "npm run eslint",
+    "server": "nodemon .",
+    "initdb": "node sync.js --harmony"
+  },
+  "precommit": [
+    "npm run precommit"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuhongda0315/mark-server.git"
+  },
+  "keywords": [
+    "map",
+    "mark"
+  ],
+  "author": "yuhongda0315@163.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yuhongda0315/mark-server/issues"
+  },
+  "homepage": "https://github.com/yuhongda0315/mark-server#readme",
+  "devDependencies": {
+    "eslint": "^5.9.0",
+    "sequelize": "^3.8.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "mysql": "^2.16.0",
+    "underscore": "^1.9.1"
+  }
+}
