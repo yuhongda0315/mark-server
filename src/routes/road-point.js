@@ -3,55 +3,57 @@ let router = express.Router();
 let { Road, RoadPoint, sequelize } = require('../db');
 let { APIResult } = require('../utils');
 let { ResponseType } = require('../enum');
+
 /* 道路下新增点 */
 router.post('/create', function (req, res, next) {
   let { body: { roadId, direction,
     longitude, latitude, type, count,
-    reverseCount, crossType, crossInfo } } = req;
+    reverseCount, crossType, crossInfo, wheelType, reverseLat, reverseLng } } = req;
 
-  return sequelize.transaction(function (t) {
-    return RoadPoint.findOne({
+  return RoadPoint.findOne({
+    where: {
+      roadId,
+      longitude,
+      latitude
+    }
+  }).then(point => {
+    if (point) {
+      return res.send(new APIResult(ResponseType.SUCCESS, point));
+    }
+    return Road.findOne({
       where: {
+        id: roadId
+      }
+    }).then(road => {
+      if (!road) {
+        return res.send(new APIResult(ResponseType.ROAD_NOT_EXIST, null, '道路信息不存在'))
+      }
+      RoadPoint.create({
         roadId,
+        direction,
         longitude,
-        latitude
-      }
-    }).then(point => {
-      if (point) {
+        latitude,
+        type,
+        count,
+        reverseCount,
+        crossType,
+        crossInfo,
+        wheelType,
+        reverseLat,
+        reverseLng
+      }).then(point => {
         return res.send(new APIResult(ResponseType.SUCCESS, point));
-      }
-      return Road.findOne({
-        where: {
-          id: roadId
-        }
-      }).then(road => {
-        if (!road) {
-          return res.send(new APIResult(ResponseType.ROAD_NOT_EXIST, null, '道路信息不存在'))
-        }
-        RoadPoint.create({
-          roadId,
-          direction,
-          longitude,
-          latitude,
-          type,
-          count,
-          reverseCount,
-          crossType,
-          crossInfo
-        }, { transaction: t }).then(point => {
-          return res.send(new APIResult(ResponseType.SUCCESS, point));
-        }, error => {
-          return res.send(new APIResult(ResponseType.POINT_CREATE, null, error));
-        });
-      })
-    });
+      }, error => {
+        return res.send(new APIResult(ResponseType.POINT_CREATE, null, error));
+      });
+    })
   }).catch(next);
 });
 /* 删除道路下的点 */
 router.post('/remove', function (req, res, next) {
-  let { body: { id } } = req;
+  let { body: { id, longitude, latitude } } = req;
   return sequelize.transaction(() => {
-    return sequelize.query('DELETE FROM points WHERE id = ' + id, {
+    return sequelize.query('DELETE FROM points WHERE id = ' + id + ' or (longitude = ' + longitude + ' and latitude = ' + latitude + ')', {
       model: RoadPoint,
       type: sequelize.QueryTypes.DELETE
     });
@@ -85,6 +87,17 @@ router.post('/edit', function (req, res, next) {
       return res.send(new APIResult(ResponseType.POINT_UPDATE, null, error));
     }).catch(next);
 });
+/*查询道路下所有点*/
+router.get('/:roadId/findAll', function (req, res, next) {
+  let { params: { roadId } } = req;
+  return RoadPoint.findAll({
+    where: {
+      roadId
+    }
+  }).then(points => {
+    return res.send(new APIResult(ResponseType.SUCCESS, points));
+  }).catch(next);
+});
 /* 查询单个点信息 */
 router.get('/:id', function (req, res, next) {
   let { params: { id } } = req;
@@ -95,17 +108,6 @@ router.get('/:id', function (req, res, next) {
   }).then(point => {
     point = point || {};
     return res.send(new APIResult(ResponseType.SUCCESS, point));
-  }).catch(next);
-});
-/*查询道路下所有点*/
-router.get('/:roadId/findAll', function (req, res, next) {
-  let { params: { roadId } } = req;
-  return RoadPoint.findAll({
-    where: {
-      roadId
-    }
-  }).then(points => {
-    return res.send(new APIResult(ResponseType.SUCCESS, points));
   }).catch(next);
 });
 module.exports = router;

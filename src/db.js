@@ -83,6 +83,21 @@ let RoadPoint = sequelize.define('points', {
     type: Sequelize.STRING(250),
     allowNull: true,
     comment: '相邻路口名称组合, 中间点时传入'
+  },
+  wheelType: {
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: true,
+    comment: '补充点类型 1: 左转、2: 左转补充、3: 右转'
+  },
+  reverseLng: {
+    type: Sequelize.STRING(250),
+    allowNull: true,
+    comment: '对面点: 经度'
+  },
+  reverseLat: {
+    type: Sequelize.STRING(250),
+    allowNull: true,
+    comment: '对面点: 经度'
   }
 });
 

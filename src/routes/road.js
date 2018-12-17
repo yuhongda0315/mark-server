@@ -8,28 +8,16 @@ router.post('/create', function (req, res, next) {
   let { body: { name, userId } } = req;
   let type = RoadType.MANUAL;
   let status = MarkStatus.MARKING;
-  return sequelize.transaction(function (t) {
-    return Road.findOne({ 
-      where: {
-        name,
-        userId
-      }
-    }).then(road => {
-      if (road) {
-        return res.send(new APIResult(200, road));
-      }
-      Road.create({
-        name,
-        userId,
-        type,
-        status
-      }, { transaction: t }).then(road => {
-        return res.send(new APIResult(ResponseType.SUCCESS, road));
-      }, error => {
-        return res.send(new APIResult(ResponseType.ROAD_CREATE, null, error));
-      });
-    });
-  }).catch(next);
+  return Road.create({
+    name,
+    userId,
+    type,
+    status
+  }).then(road => {
+    return res.send(new APIResult(ResponseType.SUCCESS, road));
+  }, error => {
+    return res.send(new APIResult(ResponseType.ROAD_CREATE, null, error));
+  }).catch(next);;
 });
 /*更新道路信息*/
 router.post('/edit', function (req, res, next) {
@@ -37,14 +25,14 @@ router.post('/edit', function (req, res, next) {
   return Road.update({
     status
   }, {
-    where: {
-      id
-    }
-  }).then(() => {
-    return res.send(new APIResult(ResponseType.SUCCESS));
-  }, error => {
-    return res.send(new APIResult(ResponseType.ROAD_UPDATE, null, error));
-  }).catch(next);
+      where: {
+        id
+      }
+    }).then(() => {
+      return res.send(new APIResult(ResponseType.SUCCESS));
+    }, error => {
+      return res.send(new APIResult(ResponseType.ROAD_UPDATE, null, error));
+    }).catch(next);
 });
 router.post('/findAll', function (req, res, next) {
   let { body: { userId } } = req;
@@ -56,6 +44,19 @@ router.post('/findAll', function (req, res, next) {
     return res.send(new APIResult(ResponseType.SUCCESS, roads));
   }, error => {
     console.log(error);
+    return res.send(new APIResult(ResponseType.ROAD_UPDATE, null, error));
+  }).catch(next);
+});
+/*删除道路信息*/
+router.post('/remove/:id', function (req, res, next) {
+  let { params: { id } } = req;
+  return Road.destroy({
+    where: {
+      id
+    }
+  }).then(() => {
+    return res.send(new APIResult(ResponseType.SUCCESS));
+  }, error => {
     return res.send(new APIResult(ResponseType.ROAD_UPDATE, null, error));
   }).catch(next);
 });
